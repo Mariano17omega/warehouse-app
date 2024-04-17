@@ -1,21 +1,769 @@
-# warehouse-app
-Gerenciador de armazém de aeroporto usando Ruby on Rails
+# Warehouse App
+
+Este é um projeto de um gerenciador de armazém de aeroporto desenvolvido utilizando Ruby on Rails. O desenvolvimento deste projeto é baseado no curso "Ruby on Rails - Uma abordagem prática com TDD".
+
+Aqui, vou compartilhar um resumo do passo a passo do desenvolvimento do projeto ao longo de todas as aulas.
 
 
-Things you may want to cover:
+## Criando o Projeto no GitHub
 
-* Ruby version
+```
+git init
+git add .
+git commit -m "Criação do projeto conflito"
+git branch -M main
+git remote add origin git@github.com:Mariano17omega/warehouse-app.git
+git pull origin main --allow-unrelated-histories
+git push -u origin main
+```
+ 
+Para atualizar as mudanças, basta utilizar:
 
-* System dependencies
+```
+git add .
+git commit -m "NomeDoCommit"
+git push
+```
 
-* Configuration
+## Em casos de erro
 
-* Database creation
+Para resolver problemas como permissões ou reinstalação de gemas, você pode usar os seguintes comandos:
 
-* Database initialization
+Remover permissão ROOT da pasta: `chmod -R 755 /home/omega/Rails/warehouse-app`
 
-* How to run the test suite
+Reinstalar as gemas: `bundle clean --force `
 
-* Services (job queues, cache servers, search engines, etc.)
+# Aula 7 - Criando a Tela inicial 
 
-* Deployment instructions
+## Criando o projeto Rails
+
+`rails new warehouse-app --minimal --skip-test`
+
+## Configurando o Bundle 
+
+Adicione as gemas "rspec-rails" e "capybara" no grupo `:development` no Gemfile e execute:
+
+```
+bundle install
+rails generate rspec:install
+```
+
+Configure o RSpec para testes do tipo sistema e o driver (`rack_test`) usado para os testes. No arquivo `rails_helper.rb`, adicione em `RSpec.configure`:
+
+``` 
+config.before(type: :system) do
+  driven_by(:rack_test)
+end
+```
+
+### Commit do Setup
+
+```
+git add .
+git commit -m "Setup da aplicação pronto -  Aula 7"
+```
+
+## Criando o primeiro Test
+
+Teste para a criação da Tela Inicial da aplicação.
+
+Crie a pasta `system` e o arquivo `user_view_homepage_spec.rb` em `spec`:
+
+
+```
+require 'rails_helper'
+
+describe 'Usuario visita tela inicial' do
+  it 'e vê o nome do app' do
+    # Arrange
+    # Act
+    visit('/')
+    # Assert
+    expect(page).to have_content('Galpões & Estoque')
+
+  end 
+end
+
+```
+### Solucionando primeiro Test
+
+Criando uma Rota para : Adicione ```get '/', to: 'home#index'```  em `routes.rb`.
+
+Criando o Controller:
+
+- Criamos o controller para home: home_controller.rb
+
+- Criamos a ação index no controller home
+
+```
+class ApplicationController < ActionController::Base
+    def index
+    end
+end
+```
+
+Em seguida, crie uma view para o controller home. Crie a pasta `home` em `views` e, dentro dela, crie a view `index.html.erb`.
+
+## Commit da aula 7
+
+```
+git add .
+git commit -m "Primeio test para a view home - Aula 7"
+git push
+```
+
+# Aula 8 - Listando Galpões 
+
+## Criando o Teste
+
+Crie um novo teste em `spec/system/user_view_homepage_spec.rb` para verificar se os galpões são listados na tela inicial:
+
+```
+it 'e vê os galpões cadrastrados' do
+    # Arrange
+    Werehouse.create(nome: 'Rio', code: 'SDU',  city: 'Rio de Janeiro', area: '60_000')
+    Werehouse.create(nome: 'Maceio', code: 'MCZ',  city: 'Maceio', area: '50_000')
+
+    # Act
+    visit('/')
+    # Assert
+    expect(page).to have_content('Rio')
+    expect(page).to have_content('SDU')
+    expect(page).to have_content('Rio de Janeiro')
+    expect(page).to have_content('60.000 m²')
+
+    expect(page).to have_content('Maceio')
+    expect(page).to have_content('MCZ')
+    expect(page).to have_content('Maceio')
+    expect(page).to have_content('50.000 m²')
+  end 
+  ```
+
+## Solucionando o Teste
+
+### Criando o Model
+
+```rails generate model warehouse name:string code:string city:string area:integer```
+
+Execute a migração:  ```rails db:migrate```
+
+OBS: O nome do model deve ser sempre no singular e em inglês.
+
+Para remover o aviso de alerta, apagamos a linha de pending no aquivo de teste unitario criando automaticamente na pasta spec.
+
+
+### Listando Galpões na tela inicial
+
+
+No `HomeController`, defina a variável na action index para receber a lista de todos os Galpões no banco de dados:
+
+
+```@Warehouses= Warehouse.all```
+
+Na view inicial, home/index.html.erb, fazemos a listagem usando essa variavel.
+
+```
+<h1>Galpões & Estoque</h1>
+
+<h2>Galpões</h2>
+
+<% @warehouses.each do |w|%>
+    <%= w.name%>
+    <%= w.code%>
+    <%= w.city%>
+    <%= w.area%> m²
+<%end %>
+```
+## Commit da aula 8
+
+```
+git add .
+git commit -m "Listando Galpões na tela inicial -  Aula 8"
+git push
+```
+
+# Aula 9 - Listando Galpões (Parte 2)
+
+## Criando o Teste
+
+Adicione um teste para o caso de não existirem galpões cadastrados e modifique o teste existente para incluir essa verificação.
+
+
+```
+  it 'e não existe galpões cadastrados' do
+    # Assert
+    # Act
+    visit('/')
+    # Assert
+    expect(page).to have_content('Não existem galpões cadastrados')
+  end
+```
+
+Além disso, adicionamos esse caso no teste 'e vê os galpões cadrastrados' 
+
+```expect(page).not_to have_content('Não existem galpões cadastrados')```
+
+## Solucionando o Teste
+
+Na pagina inicial, home, adicionamos:
+
+```
+<% if @warehouses.empty? %>
+    <p>Não existem galpões cadastrados</p>
+<%end %>
+```
+
+Para verificar o funcionamento, adicione um elemento ao banco de dados.
+
+```
+rails console
+
+Warehouse.create(name: 'Rio', code: 'SDU',  city: 'Rio de Janeiro', area: '60000')
+```
+
+## Commit  da aula 9
+
+```
+git add .
+git commit -m "Usuario vê galpões na tela inicial -  Aula 9"
+git push
+```
+ 
+
+# Aula 10 - Detalhes de um galpão 
+
+Queremos cria uma pagina para vê os detalhes de um galpão.
+
+## Criando o Teste
+
+Criamos um novo teste user_view_warehouse_details_spec.rb para acessar os detalhes de um galpão a partir da tela inicial:
+
+```
+require 'rails_helper'
+
+describe 'Usuario vê detalhes de um galpão' do
+    it 'e ve informações adicionais' do
+        # Arrange
+        Warehouse.create(name: 'Aeroporto SP', code: 'GRU',  city: 'Guarulhos', area: '100000', address: 'Avenida do Aeroporto, 1000', cep: '15000-000', description: 'Galpão destinado para cargas internacionais')
+    # Act
+    visit('/')
+    click_on('Aeroporto SP')
+    # Assert
+    expect(page).to have_content('Galpão GRU')
+    expect(page).to have_content('Nome: Aeroporto SP')
+    expect(page).to have_content('Cidade: Guarulhos')
+    expect(page).to have_content('Área: 100000 m²')
+    expect(page).to have_content('Endereço: Avenida do Aeroporto, 1000 CEP: 15000-000')
+    expect(page).to have_content('Galpão destinado para cargas internacionais')
+    end
+
+end
+```
+
+## Solucionando o Teste
+
+Adicionando Novos Atributos ao Banco de Dados.
+
+```
+rails generate migration add_address_to_warehouse address:string
+```
+
+
+```
+rails generate migration add_attributes_to_warehouse cep:string description:string
+rails db:migrate
+```
+
+Criando um CRUD de um Modelo.
+
+Adicione em routes.rb: ```resources :warehouses, only: [:show]```
+
+Para verificar as rotas criadas: ```rails routes```
+ 
+Em home/index.html.erb, criamos um link para exibição dos detalhes de um galpão. Para gerar um link onde o texto do link é o texto do galpão e o link é o caminho de exibição dos detalhes do galpão, adicionamos:
+
+```<%= link_to(w.name, warehouse_path(w.id) )%>```
+
+Depois crie o controller para gerenciar as ações sobre Warehouse.
+
+```
+class WarehouseController < ApplicationController
+    def show
+    end
+end
+```
+
+Depois crie a view `warehouses/show.html.erb` para essa action.
+
+```
+<h1>Galpão <%= @warehouse.code%></h1>
+<h2> <%= @warehouse.description %> </h2>
+<div>
+  <strong>Nome: </strong><%= @warehouse.name%>
+  <strong>Cidade: </strong><%= @warehouse.city%>
+  <strong>Área: </strong><%= @warehouse.area%> m²
+  <strong>Endereço: </strong><%= @warehouse.address%> <strong>CEP: </strong><%= @warehouse.cep%>
+
+</div>
+```
+
+Depois definimos a variavel ```@warehouse =  Warehouse.find(params[:id])``` na action show.
+
+
+```
+class WarehouseController < ApplicationController
+    def show
+      @warehouse =  Warehouse.find(params[:id])
+    end
+end
+```
+
+## Commit da aula 10
+
+```
+git add .
+git commit -m "Usuario vê detalhes de um galpão - Aula 10"
+git push
+```
+
+
+
+# Aula 11 - Detalhes de um galpão (Parte 2)
+
+Adicionamos o teste para o botão "Voltar" à tela inicial.
+
+## Criando o Teste
+
+Criamos o teste para o botão de Voltar a tela inicial.
+
+
+```
+it 'e volta para a tela inicial' do 
+      # Arrange
+      Warehouse.create(name: 'Aeroporto SP', code: 'GRU',  city: 'Guarulhos', area: '100000', address: 'Avenida do Aeroporto, 1000', cep: '15000-000', description: 'Galpão destinado para cargas internacionais')
+      
+      # Act
+      visit '/'
+      click_on 'Aeroporto SP'
+      click_on 'Voltar'
+      # Assert
+      expect(current_path).to eq('/')
+
+    end
+```
+
+## Solucionando o Teste
+
+Adicionamos em warehouses/show.html.erb:
+
+```<%= link_to 'Voltar', '/'%>```
+
+Refatoramos o codigo para usar root invez de /. Em routes.rb, mudamos ```get '/', to: 'home#index'```  para ```root to: 'home#index'```
+
+E trocamos '/' para root_path nos testes e em warehouses/show.html.erb.
+
+## Commit da aula 11
+
+```
+git add .
+git commit -m "Usuario vê galpões na tela inicial e volta para a tela inicial-  Aula 11"
+git push
+```
+
+
+# Aula 12 - Melhorias no HTML
+
+Melhoramos o HTML da pagina inicial home/index:
+
+```
+<section id="warehouse">
+  <h2>Galpões</h2>
+
+  <% @warehouses.each do |w|%>
+    <div>
+      <h3><%= link_to(w.name, warehouse_path(w.id) )%></h3>
+      <dl>
+        <dt>Código</dt>
+        <dd><%= w.code%></dd>
+        <dt>Cidade:</dt>
+        <dd><%= w.city%></dd>
+        <dt>Área:</dt>
+        <dd><%= w.area%> m²</dd>        
+      </dl>      
+    </div>
+  <%end %>
+
+  <% if @warehouses.empty? %>
+    <p>Não existem galpões cadastrados</p>
+  <%end %>
+</section>
+```
+
+Em \views\layouts\application.html.erb mudamos o body para:
+
+```
+  <body>
+    <header> 
+      <h1>Galpões & Estoque</h1>
+    </header>
+    <main>
+      <%= yield %>
+    </main>
+  </body>
+```
+
+## Commit da aula 12
+
+```
+git add .
+git commit -m "Melhorias no HTML - Aula 12"
+git push
+```
+
+# Aula 13 - Introdução aos formulários
+
+Apenas fundamendação teorica.
+
+# Aula 14 - Cadastrando um galpão
+
+## Criando o Teste
+
+Criamos o teste para Cadastro um galpão.
+
+```
+require 'rails_helper'
+
+describe 'Usuario cadastra um galpão' do
+  it 'a partir da tela inicial' do
+    # Arrange
+    # Act
+    visit root_path
+    click_on 'Cadastrar Galpão'
+    # Assert
+    expect(page).to have_field 'Nome'
+    expect(page).to have_field 'Descrição'
+    expect(page).to have_field 'Código'
+    expect(page).to have_field 'Endereço'
+    expect(page).to have_field 'Cidade'
+    expect(page).to have_field 'CEP'
+    expect(page).to have_field 'Área'
+  end
+end
+```
+
+## Solucionando o Teste
+
+Adicionamos o link na tela inicial, em home/index
+
+```
+  <div>
+  <%= link_to('Cadastra Galpão', new_warehouse_path ) %>
+  </div>
+```
+
+Adicionamos a nova rota em routes:
+
+```resources :warehouses, only: [:show, :new, :create]```
+
+Adicionamos a action new em warehouses_controller
+
+```
+    def new
+    end
+```
+
+Depois criamos uma view para a action new, nessa view fazemos o formulario:
+
+```
+<h1>Novo Galpãos</h1>
+
+<%= form_with(model: Warehouse.new) do |f| %>
+  <div>
+    <%= f.label :name, 'Nome' %>
+    <%= f.text_field :name%>
+  </div>
+  <div>
+    <%= f.label :description, 'Descrição' %>
+    <%= f.text_area :description%>
+  </div>
+  <div>
+    <%= f.label :code, 'Código' %>
+    <%= f.text_field :code%>
+  </div>
+  <div>
+    <%= f.label :address, 'Endereço' %>
+    <%= f.text_field :address%>
+  </div>
+  <div>
+    <%= f.label :city, 'Cidade' %>
+    <%= f.text_field :city%>
+  </div>
+  <div>
+    <%= f.label :cep, 'CEP' %>
+    <%= f.text_field :cep%>
+  </div>
+  <div>
+    <%= f.label :area, 'Área' %>
+    <%= f.number_field :area%>
+  </div>
+  <div>
+    <%= f.submit 'Enviar' %>  
+  </div>
+<%end%>
+
+```
+
+Depois criamos a action create no controlle:
+
+```
+  def create
+#    1 - Recebe os dados enviados 
+    warehouse_params = params.require(:warehouse).permit( :name, :code, :city, :address, :description, :cep, :area)
+    
+#    2 - Cria um novo galpão no banco de dados
+    w=Warehouse.new(warehouse_params)
+    w.save()
+#    3 - Redireciona para a tela inicial
+    redirect_to root_path
+  end
+```
+
+## Commit da aula 14
+
+```
+git add .
+git commit -m "Formulario de Cadastro de um galpão - Aula 14"
+git push
+```
+
+# Aula 15 - Flash Messages
+
+Adicionamos Flash Messages para fornecer feedback ao usuário.
+
+## Criando o Teste
+
+No Assert do teste 'com sucesso' em user_register_warehouse_spec.rb, adicionamos a linha:
+
+
+``` expect(page).to have_content 'Galpão cadastrado com sucesso.' ``` 
+
+## Solucionando o Teste
+
+Na action create do controle warehouses_controller, adicioamos a mensagem ```flash[:notice] = 'Galpão cadastrado com sucesso.' ``` antes do redirect_to root_path, ou adiciona junto ```redirect_to root_path, notice: 'Galpão cadastrado com sucesso.'```
+
+Na pagina inicial, index.html.erb, adicionamos no inicio:
+
+```
+<div>
+  <%= flash[:notice] %>
+</div>
+```
+ou
+
+```
+<div>
+  <%= notice %>
+</div>
+```
+
+Para simplificar, podemos usar o notice em layouts\application.html.erb, inves do index.
+
+## Commit da aula 15
+
+```
+git add .
+git commit -m "Adicionando Flash Messages - Aula 15"
+git push
+```
+
+# Aula 16 - Validação 
+
+## Criando o Teste
+
+Criamos um novo teste em user_register_warehouse_spec.rb:
+
+```
+  it 'com dados incompletos' do
+    # Arrange
+    # Act
+    visit root_path
+    click_on 'Cadastrar Galpão'
+    fill_in 'Nome', with: ''
+    fill_in 'Descrição', with: ''
+    fill_in 'Código', with: ''
+    click_on 'Enviar'
+    # Assert
+    expect(page).to have_content 'Galpão não cadastrado.' 
+  end
+```
+
+## Solucionando o Teste
+
+No modelo models\warehouse.rb, adicionamos a validação:
+
+```validates :nome, :code, :city, :description, :address, :cep, :area, presence: true```
+
+Na action create do warehouses_controller.rb, reescrevemos o trecho que cria um novo galpão no banco de dados e redireciona para a tela inicial.
+
+```
+    @warehouse = Warehouse.new(warehouse_params)
+    if @warehouse.save()
+      redirect_to root_path, notice: 'Galpão cadastrado com sucesso.' 
+    else
+      flash.now[:notice] = 'Galpão não cadastrado.' 
+      render 'new'
+    end
+```
+O render não suporta Flash Messages, então não podemos simplificar como em redirect_to.
+
+OBS: Não esquecer de usar aspas no new!
+
+Na action new instanciamos a variavel ```@warehouse = Warehouse.new()``` para substitui ```Warehouse.new``` por ```@warehouse``` no formulario new.html.erb. 
+
+Dessa forma, quando um galpão for cadastrado com dados incompletos, a pagina vai ser atualizada aparecendo uma mensagem e as informações já digitadas no formulario.
+
+OBS: Corrigir os testes anteriores onde usamos informações incompletas nos formularios.
+
+## Commit da aula 16
+
+```
+git add .
+git commit -m "Validação - Aula 16"
+git push
+```
+
+# Aula 17 - Testes unitários
+
+Escrevemos testes unitários para validar os campos do modelo.
+
+## Criando o Teste
+
+Em spec\models\warehouse_spec.rb, escrevemos os testes para verificar a validação de todos os campos.
+
+```
+require 'rails_helper'
+
+RSpec.describe Warehouse, type: :model do
+  describe '#valid?' do
+    context 'Apresenta' do
+      it 'Falso quando o name está vazio' do
+        # Assert
+        warehouse = Warehouse.new(name: '', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+
+        # Act 
+        result = warehouse.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o code está vazio' do
+        # Assert
+        warehouse = Warehouse.new(name: 'RIO', code: '',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+    
+        # Act 
+        result = warehouse.valid?
+    
+        # Assert
+        expect(result).to eq false        
+      end
+
+      it 'Falso quando a city está vazio' do
+        # Assert
+        warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: '', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+    
+        # Act 
+        result = warehouse.valid?
+    
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando a area está vazio' do
+        # Assert
+        warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+    
+        # Act 
+        result = warehouse.valid?
+    
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o address está vazio' do
+        # Assert
+        warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: ''  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+    
+        # Act 
+        result = warehouse.valid?
+    
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o cep está vazio' do
+        # Assert
+        warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+    
+        # Act 
+        result = warehouse.valid?
+    
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando a description está vazio' do
+        # Assert
+        warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: '')
+    
+        # Act 
+        result = warehouse.valid?
+    
+        # Assert
+        expect(result).to eq false
+      end
+    end
+
+    context 'Apresenta' do
+
+      it 'Falso quando o CODE já está sendo usado' do
+        # Assert
+        first_warehouse = Warehouse.create(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+                    
+      second_warehouse = Warehouse.new(name: 'Maceio', code: 'SDU',  city: 'Maceio', area: '50000', address: 'Tabuleiro do Pinto, Rio Largo' , cep: '57100-000' , description: 'Galpão do aeroporto Internacional de Maceió' )
+
+        # Act 
+        result = second_warehouse.valid?
+
+        # Assert
+        expect(result).to eq false  
+      end
+    end
+
+  end
+end
+```
+
+Para testes de instancia, usamos ```'#valid?'```.
+
+Podemos usar a simplificação ```expect(warehouse).not_to be_valid``` para simplificar as linhas:
+
+```
+result = warehouse.valid?
+expect(result).to eq false  
+```
+
+## Solucionando o Teste
+
+Depois em app\models\warehouse.rb, adicionamos a validação ```validates :code, uniqueness: true``` para que o código seja de uso único.
+
+## Commit da aula 17
+
+```
+git add .
+git commit -m "Testes unitários - Aula 17"
+git push
+```
+ 
+
+ 
