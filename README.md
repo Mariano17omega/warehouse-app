@@ -765,7 +765,7 @@ git commit -m "Testes unitários - Aula 17"
 git push
 ```
 
-# Aula  - i18n
+# Aula 18  - i18n
 Implementando internacionalização i18n
 
 Em config/locales criamos o arquivo pt-BR.yml com 
@@ -913,12 +913,167 @@ Na tela de cadastro, view new.html.erb, adicionamos no inicio:
 <%end%>
 ```
 
+## Commit da aula 18
+
+```
+git add .
+git commit -m "Implementando internacionalização i18n - Aula 18"
+git push
+```
+
+
+# Aula 19  - Editar galpão 
+
+## Criando Teste para Editar galpão 
+
+Criamos o arquivo user_edit_warehouse_spec.rb em spec/system e ecrevemos um novo teste.
+
+```
+require 'rails_helper'
+
+describe 'Usuario edita um galpão' do
+  it 'a partir da tela inicial' do
+    # Arrange
+    warehouse = Warehouse.create!(name: 'Rio', code: 'SDU',  city: 'Rio de Janeiro', area: '60000',
+                address: 'Ilha do Governador', cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+
+    # Act
+    visit root_path
+    click_on 'Rio'
+    click_on 'Editar'
+    # Assert
+    expect(page).to have_content 'Editar Galpão'
+
+    expect(page).to have_field 'Nome', with: 'São Paulo'
+    expect(page).to have_field 'Descrição', with: 'Aeroporto de SP'
+    expect(page).to have_field 'Código' , with: 'ASP'
+    expect(page).to have_field 'Endereço' , with: 'Em algum lugar de São Paulo'
+    expect(page).to have_field 'Cidade', with: 'São Paulo'
+    expect(page).to have_field 'CEP' , with: '2343-545'
+    expect(page).to have_field 'Área', with: '660066'
+  end
+
+end
+
+```
+
+Onde with verifica o valor preenchido no campo do formulario.
+
+
+## Solucionando o Teste
+
+Em routes, adicionamos mais duas rotas em resources:
+
+``` resources :warehouses, only: [:show, :new, :create, :edit, :update] ```
+
+Na view warehouses/show.html.erb, adicionamos o botão de editar:
+
+``` <%= link_to 'Editar', edit_warehouse_path( @warehouse.id ) %> ```
+
+Em seguida, criamos a action edit em warehouses_controller.rb e sua respectiva view, edit.html.erb.
+
+ 
+```   
+def edit  
+  @warehouse =  Warehouse.find(params[:id])
+end
+```
+
+Copiamos o codigo do formulario de new.html.erb para edit.html.erb. para reaproveitar o codigo do formulario de cadastro.
+
+
+## Criando Teste para a edição com Sucesso
+
+Adicionamos um teste para avaliar o cadastro com sucesso.
+
+```   
+it 'com sucesso' do
+  # Arrange
+  warehouse = Warehouse.create!(name: 'Rio', code: 'SDU',  city: 'Rio de Janeiro', area: '60000',
+                address: 'Ilha do Governador', cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+
+  # Act
+  visit root_path
+  click_on 'Rio'
+  click_on 'Editar'
+
+  fill_in 'Nome',	with: 'São Paulo'
+  fill_in 'Cidade',	with: 'São Paulo'
+  fill_in 'Endereço',	with: 'Avenida qualquer'
+  fill_in 'Área',	with: '6666666'
+  click_on 'Enviar'
+  # Assert
+  expect(page).to have_content 'Galpão Atualizado com sucesso'
+  expect(page).to have_content 'Nome: São Paulo'
+  expect(page).to have_content 'Área: 6666666 m²'
+  expect(page).to have_content 'Endereço: Avenida qualquer'
+  expect(page).to have_content 'Cidade: São Paulo'
+end
+```
+## Solucionando o Teste
+
+Em warehouses_controller.rb, adicionamos a action:
+
+```
+def update
+  warehouse_params = params.require(:warehouse).permit( :name, :code, :city, :address, :description, :cep, :area)
+  @warehouse =  Warehouse.find(params[:id])
+  @warehouse.update(warehouse_params)
+
+  redirect_to warehouse_path(  @warehouse.id ), notice: 'Galpão Atualizado com sucesso'
+end
+```
+
+
+## Criando Teste para os campos obrigadorios na edição
+
+```
+it 'e mantem os campos obrigadorios' do
+  # Arrange
+  warehouse = Warehouse.create!(name: 'Rio', code: 'SDU',  city: 'Rio de Janeiro', area: '60000',
+              address: 'Ilha do Governador', cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
+
+  # Act
+  visit root_path
+  click_on 'Rio'
+  click_on 'Editar'
+
+  fill_in 'Nome',	with: ''
+  fill_in 'Cidade',	with: 'São Paulo'
+  fill_in 'Endereço',	with: ''
+  fill_in 'Área',	with: ''
+  click_on 'Enviar'
+  # Assert
+  expect(page).to have_content 'Não foi possivel atualizar o galpão' 
+end
+```
+
+## Solucionando o Teste
+
+Atualizamos a action update
+
+```
+  def update
+    warehouse_params = params.require(:warehouse).permit( :name, :code, :city, :address, :description, :cep, :area)
+
+    @warehouse =  Warehouse.find(params[:id])
+    if @warehouse.update(warehouse_params)
+      redirect_to warehouse_path(  @warehouse.id ), notice: 'Galpão Atualizado com sucesso'
+    else
+      flash[:notice] = 'Não foi possivel atualizar o galpão.'
+      render 'edit'
+    end
+  end
+```
+
+
+ 
 
 ## Commit da aula 
 
 ```
 git add .
-git commit -m "Implementando internacionalização i18n - Aula 18"
+git commit -m "  - Aula "
 git push
 ```
  
