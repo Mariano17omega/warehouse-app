@@ -922,7 +922,10 @@ git push
 ```
 
 
-# Aula 19  - Editar galpão 
+
+
+# Aula 19  - Editar galpão
+
 
 ## Criando Teste para Editar galpão 
 
@@ -1066,14 +1069,80 @@ Atualizamos a action update
   end
 ```
 
-
- 
-
-## Commit da aula 
+## Commit da aula 19
 
 ```
 git add .
-git commit -m "  - Aula "
+git commit -m "Editar galpão - Aula 19"
+git push
+```
+
+# Aula 20  - Removendo repetições no código
+
+Criamos um metodo privato em warehouses_controller.rb para não repetir o mesmo codigo nas actions
+
+```
+private
+
+def set_warehouse
+  @warehouse =  Warehouse.find(params[:id])
+end
+
+def warehouse_params
+  params.require(:warehouse).permit( :name, :code, :city, :address, :description, :cep, :area)    
+end
+```
+
+Usando ```before_action :set_warehouse, only: [:show, :edit, :update]``` no incio de warehouses_controller.rb, o metodo set_warehouse é iniciado nos metodos show, edit e update.
+
+Usando Patials views, crie um arquivo _form.html.erb com o mesmo formulario das views edit e new.
+
+```
+<%= form_with(model: @warehouse ) do |f| %>
+  <div>
+    <%= f.label :name %>
+    <%= f.text_field :name%>
+  </div>
+  <div>
+    <%= f.label :description %>
+    <%= f.text_area :description%>
+  </div>
+  <div>
+    <%= f.label :code %>
+    <%= f.text_field :code%>
+  </div>
+  <div>
+    <%= f.label :address%>
+    <%= f.text_field :address%>
+  </div>
+  <div>
+    <%= f.label :city%>
+    <%= f.text_field :city%>
+  </div>
+  <div>
+    <%= f.label :cep %>
+    <%= f.text_field :cep%>
+  </div>
+  <div>
+    <%= f.label :area  %>
+    <%= f.number_field :area%>
+  </div>
+  <div>
+    <%= f.submit 'Enviar' %>   
+  </div>
+<%end%>
+
+```
+
+OBS: Uma  Patial view sempre começa com _.
+
+Nas views edit e new de warehouses_controller.rb, removemos o formulario e colocamos ``` <%= render 'form'%> ```.
+
+## Commit da aula 20
+
+```
+git add .
+git commit -m "Removendo repetições no código- Aula 20"
 git push
 ```
  
