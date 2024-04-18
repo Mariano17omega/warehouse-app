@@ -764,6 +764,161 @@ git add .
 git commit -m "Testes unitários - Aula 17"
 git push
 ```
- 
 
+# Aula  - i18n
+Implementando internacionalização i18n
+
+Em config/locales criamos o arquivo pt-BR.yml com 
+
+```
+pt-BR:
+  hello: 'Olá Mundo'
+```
+
+Para definir o pt-BR como o padrão, em config/initializers, criamos o arquivo locale.rb e escrevemos: 
+
+```
+I18n.available_locales = [:en, :'pt-BR']
+
+I18n.default_locale = :'pt-BR'
+```
+
+Para verificar o funcionamento, adicionamos o sequinte parágrafo na view de home:
+
+```
+  <p>
+    <%=I18n.translate('hello')%>
+  </p>
+
+```
+
+Após usar .valid? para fazer a validação de um cadastro com informações incompletas, é possivel visualizar as mensagens de erro usando o metodo .errors.full_messages. Essas mensagens são geradas pelo proprio Rails e estão em inglês.
+
+Removendo os nomes dos campos no formulario de cadastro, o texto dos campos passam a ser os nomes dos atributos que estão sendo inseridos (name, description, code, etc.) e inves de exibir submit, o botão de enviar passa a ter o texto Create Warehouse.
+
+```
+<h1>Novo Galpãos</h1>
+
+<%= form_with(model: @warehouse ) do |f| %>
+  <div>
+    <%= f.label :name %>
+    <%= f.text_field :name%>
+  </div>
+  <div>
+    <%= f.label :description %>
+    <%= f.text_area :description%>
+  </div>
+  <div>
+    <%= f.label :code %>
+    <%= f.text_field :code%>
+  </div>
+  <div>
+    <%= f.label :address %>
+    <%= f.text_field :address%>
+  </div>
+  <div>
+    <%= f.label :city %>
+    <%= f.text_field :city%>
+  </div>
+  <div>
+    <%= f.label :cep %>
+    <%= f.text_field :cep%>
+  </div>
+  <div>
+    <%= f.label :area  %>
+    <%= f.number_field :area%>
+  </div>
+  <div>
+    <%= f.submit   %>  
+  </div>
+<%end%>
+
+```
+
+A gem rails-i18n fornecer um conjunto mais completo de tradução para diferentes localidades. Para instalar apenas o pacote de pt-BR, baixamos o arquivo pt-BR.yml de <a href="<%=  https://github.com/svenfuchs/rails-i18n/tree/master/rails/locale/ %>">rails-i18n/a>, depois salvamos o arquivo na pasta locales.
+
+Com isso, o botão de enviar passa a ter o texto Criar Warehouse inves de Create Warehouse.
+ 
+Em config/locales criamos o arquivo models.yml com a tradução do model e de seus atributos:
+
+```
+pt-BR:
+  activerecord:
+    models:
+      warehouse: 'Galpão'
+    attributes:
+      warehouse:
+        name: 'Nome'
+        code: 'Código'
+        description: 'Descrição'
+        city: 'Cidade'
+        area: 'Área'
+        address: 'Endereço'
+        cep: 'CEP'
+
+```
+Assim, inves de aparecer name, description, code, etc. nas mensagens de erro geradas pelo rails e na exibição, quando não definimos um nome para o campo, como visto anteriomente, agora o Rails vai usar os nomes traduzidos sempre que for exibi-los para o usuario.
+
+Para visualizar as mensagens de erro, abrimos o Rails console e tentamos cadastrar um galpão com todos os atribudos vazios:
+
+```
+warehouse = Warehouse.new(name: '', code: '',  city: '', area: '', address: ''  , cep: '' , description: '')
+
+warehouse.valid? 
+
+warehouse.errors.full_messages
+```
+
+Oresultado de warehouse.errors.full_messages é uma lista com os erros usando os nomes traduzidos de models.yml.
+
+```
+["Nome não pode ficar em branco",
+ "Código não pode ficar em branco",
+ "Cidade não pode ficar em branco",
+ "Descrição não pode ficar em branco",
+ "Endereço não pode ficar em branco",
+ "CEP não pode ficar em branco",
+ "Área não pode ficar em branco"]
+```
+
+
+## Criando o Teste
+
+Queremos que sejam exibidas as mensagens de erro quando o usuario tenta cadastrar um galpão invalido.
+
+Adicionando mais alguns testes em ser_register_warehouse_spec.rb para quando tivemos dados incompletos.
+
+```
+expect(page).to have_content 'Nome não pode ficar em branco'
+expect(page).to have_content 'Código não pode ficar em branco'
+expect(page).to have_content 'Cidade não pode ficar em branco'
+expect(page).to have_content 'Descrição não pode ficar em branco'
+expect(page).to have_content 'Endereço não pode ficar em branco"'
+expect(page).to have_content 'CEP não pode ficar em branco'
+expect(page).to have_content 'Área não pode ficar em branco'
+```
+
+## Solucionando o Teste
+
+Na tela de cadastro, view new.html.erb, adicionamos no inicio:
+
+```
+<% if @warehouse.errors.any? %>
+<p> Verifique os erros abaixo: </p>
+<ul>
+  <%@warehouse.errors.full_messages.each do |msg|%>
+    <li> <%= msg %></li>
+  <%end%>
+</ul>
+<%end%>
+```
+
+
+## Commit da aula 
+
+```
+git add .
+git commit -m "Implementando internacionalização i18n - Aula 18"
+git push
+```
  

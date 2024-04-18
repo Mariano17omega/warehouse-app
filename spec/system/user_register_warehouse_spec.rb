@@ -27,14 +27,14 @@ describe 'Usuario cadastra um galpão' do
     fill_in 'Endereço', with: 'Avenida do museu do Amanhã, 1000'
     fill_in 'Cidade', with: 'Rio de Janeiro'
     fill_in 'CEP', with: '20100-000'
-    fill_in 'Área', with: '32000' 
+    fill_in 'Área', with: '32000'
     click_on 'Enviar'
     # Assert
     expect(current_path).to eq root_path
     expect(page).to have_content 'Galpão cadastrado com sucesso.'
     expect(page).to have_content 'Rio de Janeiro'
     expect(page).to have_content 'RIO'
-    expect(page).to have_content '32000 m²' 
+    expect(page).to have_content '32000 m²'
   end
 
   it 'com dados incompletos' do
@@ -47,6 +47,15 @@ describe 'Usuario cadastra um galpão' do
     fill_in 'Código', with: ''
     click_on 'Enviar'
     # Assert
-    expect(page).to have_content 'Galpão não cadastrado.' 
+    expect(page).to have_content 'Galpão não cadastrado.'
+
+    expect(page).to have_content 'Nome não pode ficar em branco'
+    expect(page).to have_content 'Código não pode ficar em branco'
+    expect(page).to have_content 'Cidade não pode ficar em branco'
+    expect(page).to have_content 'Descrição não pode ficar em branco'
+    expect(page).to have_content 'Endereço não pode ficar em branco'
+    expect(page).to have_content 'CEP não pode ficar em branco'
+    expect(page).to have_content 'Área não pode ficar em branco'
+
   end
 end
