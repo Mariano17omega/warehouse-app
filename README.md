@@ -765,7 +765,7 @@ git commit -m "Testes unitários - Aula 17"
 git push
 ```
 
-# Aula 18  - i18n
+# Aula 18 - i18n
 Implementando internacionalização i18n
 
 Em config/locales criamos o arquivo pt-BR.yml com 
@@ -924,7 +924,7 @@ git push
 
 
 
-# Aula 19  - Editar galpão
+# Aula 19 - Editar galpão
 
 
 ## Criando Teste para Editar galpão 
@@ -1077,7 +1077,7 @@ git commit -m "Editar galpão - Aula 19"
 git push
 ```
 
-# Aula 20  - Removendo repetições no código
+# Aula 20 - Removendo repetições no código
 
 Criamos um metodo privato em warehouses_controller.rb para não repetir o mesmo codigo nas actions
 
@@ -1146,3 +1146,64 @@ git commit -m "Removendo repetições no código- Aula 20"
 git push
 ```
  
+
+# Aula 21 - Apagando galpões
+
+## Criando o Teste
+
+```
+
+describe 'Usuario remove um galpão' do
+  it 'Com sucesso' do
+    # Arrange
+    Warehouse.create(name: 'Maceio', code: 'MCZ',  city: 'Maceio', area: '50000', address: 'Tabuleiro do Pinto, Rio Largo' , cep: '57100-000' , description: 'Galpão do aeroporto Internacional de Maceió' )
+
+    # Act
+    visit root_path
+    click_on 'Maceio'
+    click_on 'Remover'
+    # Assert
+    expect(current_path).to eq root_path
+    expect(page).to have_content 'Galpão removido com sucesso'
+    expect(page).not_to have_content 'Maceio'
+    expect(page).not_to have_content 'MCZ'
+
+  end
+end
+
+```
+
+## Solucionando o Teste
+
+
+Em routes adicionamos a rota destroy em resources.
+
+```
+resources :warehouses, only: [:show, :new, :create, :edit, :update, :destroy]
+```
+
+Em views/warehouses/show.html.erb, adicionamos 
+
+
+``` 
+<%= button_to 'Remover', warehouse_path(@warehouse.id), method: :delete %>
+```
+ 
+Em warehouses_controller.rb acicionamos a action 
+
+``` 
+def destroy
+  @warehouse.destroy
+  redirect_to root_path, notice: 'Galpão removido com sucesso'
+end
+```
+
+e incluimos destroy em before_action.
+
+## Commit da aula 21
+
+```
+git add .
+git commit -m "Apagando galpões - Aula 21"
+git push
+```
