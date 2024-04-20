@@ -1207,3 +1207,11 @@ git add .
 git commit -m "Apagando galpões - Aula 21"
 git push
 ```
+
+# Aula 22 - CRUD de Fornecedores
+
+
+## Criando o Teste
+
+
+## Solucionando o Teste
