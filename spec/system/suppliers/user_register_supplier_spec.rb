@@ -36,12 +36,10 @@ describe 'Usuario cadastra um fornecedor' do
     click_on 'Enviar'
 
     #  Assert
-    expect(current_path).to eq root_path
+    expect(current_path).to eq suppliers_path
     expect(page).to have_content 'Fornecedor cadastrado com sucesso.'
-    expect(page).to have_content 'ACME LTDA'
-    expect(page).to have_content 'Documento: 29452204000145'
-    expect(page).to have_content 'Endereço: Av das Plamas, 100 - Bauru - SP'
-    expect(page).to have_content 'E-mail: contato@acme.com'
+    expect(page).to have_content 'ACME'
+    expect(page).to have_content 'Bauru - SP'
 
   end
 
@@ -63,8 +61,7 @@ describe 'Usuario cadastra um fornecedor' do
     click_on 'Enviar'
 
     #  Assert
-    expect(current_path).to eq root_path
-    expect(page).to have_content 'Fornecedor não cadastrado.'
+    expect(page).to have_content 'Fornecedor não cadastrado'
     expect(page).to have_content 'Nome Fantasia não pode ficar em branco'
     expect(page).to have_content 'Razão Social não pode ficar em branco'
     expect(page).to have_content 'CNPJ não pode ficar em branco'

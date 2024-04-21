@@ -9,7 +9,7 @@ class WarehousesController < ApplicationController
 
   def create
 #    1 - Recebe os dados enviados
-    warehouse_params
+    #warehouse_params
 
 #    2 - Cria um novo galpão no banco de dados
     @warehouse = Warehouse.new(warehouse_params)
@@ -29,7 +29,7 @@ class WarehousesController < ApplicationController
   def edit; end
 
   def update
-    warehouse_params
+    #warehouse_params
 
     if @warehouse.update(warehouse_params)
       redirect_to warehouse_path(  @warehouse.id ), notice: 'Galpão Atualizado com sucesso'

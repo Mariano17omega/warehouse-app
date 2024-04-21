@@ -7,7 +7,7 @@ RSpec.describe Warehouse, type: :model do
         # Assert
         warehouse = Warehouse.new(name: '', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
 
-        # Act 
+        # Act
         result = warehouse.valid?
 
         # Assert
@@ -17,21 +17,21 @@ RSpec.describe Warehouse, type: :model do
       it 'Falso quando o code está vazio' do
         # Assert
         warehouse = Warehouse.new(name: 'RIO', code: '',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
-    
-        # Act 
+
+        # Act
         result = warehouse.valid?
-    
+
         # Assert
-        expect(result).to eq false        
+        expect(result).to eq false
       end
 
       it 'Falso quando a city está vazio' do
         # Assert
         warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: '', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
-    
-        # Act 
+
+        # Act
         result = warehouse.valid?
-    
+
         # Assert
         expect(result).to eq false
       end
@@ -39,10 +39,10 @@ RSpec.describe Warehouse, type: :model do
       it 'Falso quando a area está vazio' do
         # Assert
         warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
-    
-        # Act 
+
+        # Act
         result = warehouse.valid?
-    
+
         # Assert
         expect(result).to eq false
       end
@@ -50,10 +50,10 @@ RSpec.describe Warehouse, type: :model do
       it 'Falso quando o address está vazio' do
         # Assert
         warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: ''  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
-    
-        # Act 
+
+        # Act
         result = warehouse.valid?
-    
+
         # Assert
         expect(result).to eq false
       end
@@ -61,10 +61,10 @@ RSpec.describe Warehouse, type: :model do
       it 'Falso quando o cep está vazio' do
         # Assert
         warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
-    
-        # Act 
+
+        # Act
         result = warehouse.valid?
-    
+
         # Assert
         expect(result).to eq false
       end
@@ -72,16 +72,14 @@ RSpec.describe Warehouse, type: :model do
       it 'Falso quando a description está vazio' do
         # Assert
         warehouse = Warehouse.new(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: '')
-    
-        # Act 
+
+        # Act
         result = warehouse.valid?
-    
+
         # Assert
         expect(result).to eq false
       end
     end
-
-
 
 
 
@@ -90,14 +88,14 @@ RSpec.describe Warehouse, type: :model do
       it 'Falso quando o CODE já está sendo usado' do
         # Assert
         first_warehouse = Warehouse.create(name: 'RIO', code: 'SDU',  city: 'Rio de Janeiro', area: '60000', address: 'Ilha do Governador'  , cep: '21941-900' , description: 'Galpão do aeroporto Santos Dumont, no Rio de Janeiro')
-          
-          
+
+
       second_warehouse = Warehouse.new(name: 'Maceio', code: 'SDU',  city: 'Maceio', area: '50000', address: 'Tabuleiro do Pinto, Rio Largo' , cep: '57100-000' , description: 'Galpão do aeroporto Internacional de Maceió' )
 
-        # Act 
+        # Act
         #result = second_warehouse.valid?
         # Assert
-        #expect(result).to eq false  
+        #expect(result).to eq false
         expect(second_warehouse).not_to be_valid
       end
     end

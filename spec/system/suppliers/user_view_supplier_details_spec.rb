@@ -27,7 +27,7 @@ describe 'Usuario vê detalhes do fornecedore' do
     click_on 'ACME'
     click_on 'Voltar'
     #  Assert
-    expect(current_path).to eq root_path
+    expect(current_path).to eq suppliers_path
 
   end
 

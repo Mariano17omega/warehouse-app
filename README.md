@@ -1211,7 +1211,659 @@ git push
 # Aula 22 - CRUD de Fornecedores
 
 
-## Criando o Teste
+## Criando os Testes
 
 
-## Solucionando o Teste
+Em spec/system/suppliers/user_view_suppliers_spec.rb :
+
+```
+require 'rails_helper'
+
+describe 'Usuario vê fornecedores' do
+  it 'a partir do menu' do
+    #  Arrange
+    #  Act
+    visit root_path
+    within('nav') do
+      click_on 'Fornecedores'
+    end
+    #  Assert
+    expect(current_path).to eq suppliers_path
+  end
+
+  it 'com sucesso' do
+    #  Arrange
+    Supplier.create!(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+                    full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+    Supplier.create!(corporate_name: 'Spark Industires LTDA', brand_name: 'Spark', registration_number: '52654414000138',
+                    full_address: 'Torre da Indústria, 1', city: 'Teresina', state: 'PI', email: 'contato_spark@spark.com' )
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    #  Assert
+    expect(page).to have_content 'Fornecedores'
+    expect(page).to have_content 'ACME'
+    expect(page).to have_content 'Bauru - SP'
+
+    expect(page).to have_content 'Spark'
+    expect(page).to have_content 'Teresina - PI'
+  end
+
+  it 'e não existem fornecedores cadastrados' do
+    #  Arrange
+    #  Act
+    visit root_path
+    within('nav') do
+      click_on 'Fornecedores'
+    end
+    #  Assert
+    expect(page).to have_content 'Não existem fornecedores cadastrados.'
+  end
+
+end
+
+```
+
+Em spec/system/suppliers/user_view_supplier_details_spec.rb:
+
+```
+require 'rails_helper'
+
+describe 'Usuario vê detalhes do fornecedore' do
+  it 'a partir da tela inicial' do
+    #  Arrange
+    Supplier.create!(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+                    full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'ACME'
+    #  Assert
+    expect(page).to have_content 'ACME LTDA'
+    expect(page).to have_content 'Documento: 29452204000145'
+    expect(page).to have_content 'Endereço: Av das Plamas, 100 - Bauru - SP'
+    expect(page).to have_content 'Email: contato@acme.com'
+
+  end
+
+  it 'e volta para a tela inicial' do
+    #  Arrange
+    Supplier.create!(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+                    full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'ACME'
+    click_on 'Voltar'
+    #  Assert
+    expect(current_path).to eq suppliers_path
+
+  end
+
+
+end
+
+```
+
+
+
+Em spec/system/suppliers/user_register_supplier_spec.rb:
+```
+require 'rails_helper'
+
+describe 'Usuario cadastra um fornecedor' do
+  it 'a partir do menu' do
+    #  Arrange
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'Cadastrar novo fornecedor'
+    #  Assert
+    expect(page).to have_field 'Nome Fantasia'
+    expect(page).to have_field 'Razão Social'
+    expect(page).to have_field 'CNPJ'
+    expect(page).to have_field 'Endereço'
+    expect(page).to have_field 'Cidade'
+    expect(page).to have_field 'Estado'
+    expect(page).to have_field 'E-mail'
+
+
+  end
+
+  it 'com sucesso' do
+    #  Arrange
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'Cadastrar novo fornecedor'
+
+    fill_in 'Nome Fantasia',	with: 'ACME'
+    fill_in 'Razão Social',	with: 'ACME LTDA'
+    fill_in 'CNPJ',	with: '29452204000145'
+    fill_in 'Endereço',	with: 'Av das Plamas, 100'
+    fill_in 'Cidade',	with: 'Bauru'
+    fill_in 'Estado',	with: 'SP'
+    fill_in 'E-mail',	with: 'contato@acme.com'
+    click_on 'Enviar'
+
+    #  Assert
+    expect(current_path).to eq suppliers_path
+    expect(page).to have_content 'Fornecedor cadastrado com sucesso.'
+    expect(page).to have_content 'ACME'
+    expect(page).to have_content 'Bauru - SP'
+
+  end
+
+
+  it 'com dados incopletos' do
+    #  Arrange
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'Cadastrar novo fornecedor'
+
+    fill_in 'Nome Fantasia',	with: ''
+    fill_in 'Razão Social',	with: ''
+    fill_in 'CNPJ',	with: ''
+    fill_in 'Endereço',	with: 'Av das Plamas, 100'
+    fill_in 'Cidade',	with: 'Bauru'
+    fill_in 'Estado',	with: 'SP'
+    fill_in 'E-mail',	with: 'contato@acme.com'
+    click_on 'Enviar'
+
+    #  Assert
+    expect(page).to have_content 'Fornecedor não cadastrado'
+    expect(page).to have_content 'Nome Fantasia não pode ficar em branco'
+    expect(page).to have_content 'Razão Social não pode ficar em branco'
+    expect(page).to have_content 'CNPJ não pode ficar em branco'
+  end
+end
+
+
+```
+
+Em spec/system/suppliers/user_edit_supplier_spec.rb:
+
+```
+require 'rails_helper'
+
+describe 'Usuario Editar um fornecedor' do
+  it 'a partir do menu' do
+    #  Arrange
+    Supplier.create!(corporate_name: 'ACME LTDA', brand_name: 'ACMES', registration_number: '29452204000145',
+    full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'ACMES'
+    click_on 'Editar'
+    #  Assert
+    expect(page).to have_field 'Nome Fantasia'
+    expect(page).to have_field 'Razão Social'
+    expect(page).to have_field 'CNPJ'
+    expect(page).to have_field 'Endereço'
+    expect(page).to have_field 'Cidade'
+    expect(page).to have_field 'Estado'
+    expect(page).to have_field 'E-mail'
+
+  end
+
+  it 'com sucesso' do
+    #  Arrange
+    Supplier.create!(corporate_name: 'ACME LTDA', brand_name: 'ACMES', registration_number: '29452204000145',
+    full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'ACMES'
+    click_on 'Editar'
+
+    fill_in 'Nome Fantasia',	with: 'STARK'
+    fill_in 'Razão Social',	with: 'STARK Industires LTDA'
+    fill_in 'Endereço',	with: 'Nova York, T10'
+    fill_in 'Cidade',	with: 'Nova York'
+    fill_in 'Estado',	with: 'NY'
+    fill_in 'E-mail',	with: 'contato@stark.com'
+    click_on 'Enviar'
+
+    #  Assert
+    #expect(current_path).to eq root_path
+    expect(page).to have_content 'Fornecedor editado com sucesso.'
+    expect(page).to have_content 'STARK Industires LTDA'
+    expect(page).to have_content 'Documento: 29452204000145'
+    expect(page).to have_content 'Endereço: Nova York, T10 - Nova York - NY'
+    expect(page).to have_content 'contato@stark.com'
+
+  end
+
+
+  it 'com dados incopletos' do
+    #  Arrange
+    Supplier.create!(corporate_name: 'Spark Industires LTDA', brand_name: 'Spark', registration_number: '52654414000138',
+    full_address: 'Torre da Indústria, 1', city: 'Teresina', state: 'PI', email: 'contato_spark@spark.com' )
+
+    #  Act
+    visit root_path
+    click_on 'Fornecedores'
+    click_on 'Spark'
+    click_on 'Editar'
+
+    fill_in 'Nome Fantasia',	with: ''
+    fill_in 'Razão Social',	with: ''
+    fill_in 'Endereço',	with: 'Nova York, T10'
+    fill_in 'Cidade',	with: 'Nova York'
+    fill_in 'Estado',	with: 'NY'
+    fill_in 'E-mail',	with: 'contato@stark.com'
+    fill_in 'CNPJ',	with: ''
+    click_on 'Enviar'
+
+    #  Assert
+    expect(page).to have_content 'Não foi possível editar o Fornecedor'
+    expect(page).to have_content 'Nome Fantasia não pode ficar em branco'
+    expect(page).to have_content 'Razão Social não pode ficar em branco'
+    expect(page).to have_content 'CNPJ não pode ficar em branco'
+  end
+end
+
+```
+
+Em spec/models/supplier_spec.rb:
+
+```
+require 'rails_helper'
+
+RSpec.describe Supplier, type: :model do
+  describe '#valid?' do
+    context 'Apresenta' do
+      it 'Falso quando o corporate_name está vazio' do
+        # Assert
+        supplier =Supplier.new(corporate_name: '', brand_name: 'ACME', registration_number: '29452204000145',
+        full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+        # Act
+        result = supplier.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o brand_name está vazio' do
+        # Assert
+        supplier =Supplier.new(corporate_name: 'ACME LTDA', brand_name: '', registration_number: '29452204000145',
+        full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+        # Act
+        result = supplier.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o registration_number está vazio' do
+        # Assert
+        supplier =Supplier.new(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '',
+        full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+        # Act
+        result = supplier.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o full_address está vazio' do
+        # Assert
+        supplier =Supplier.new(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+        full_address: '', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+        # Act
+        result = supplier.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o city está vazio' do
+        # Assert
+        supplier =Supplier.new(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+        full_address: 'Av das Plamas, 100', city: '', state: 'SP', email: 'contato@acme.com' )
+
+        # Act
+        result = supplier.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o state está vazio' do
+        # Assert
+        supplier =Supplier.new(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+        full_address: 'Av das Plamas, 100', city: 'Bauru', state: '', email: 'contato@acme.com' )
+
+        # Act
+        result = supplier.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+      it 'Falso quando o email está vazio' do
+        # Assert
+        supplier =Supplier.new(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+        full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: '' )
+
+        # Act
+        result = supplier.valid?
+
+        # Assert
+        expect(result).to eq false
+      end
+
+
+      context 'Apresenta' do
+
+        it 'Falso quando o corporate_name já está sendo usado' do
+          # Assert
+          first_supplier= Supplier.create(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+                                          full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+          second_supplier =Supplier.new(corporate_name: 'ACME LTDA', brand_name: 'Spark', registration_number: '52654414000138',
+                                            full_address: 'Torre da Indústria, 1', city: 'Teresina', state: 'PI', email: 'contato_spark@spark.com' )
+
+          # Act
+          # Assert
+          expect(second_supplier).not_to be_valid
+        end
+        it 'Falso quando o email já está sendo usado' do
+          # Assert
+          first_supplier= Supplier.create(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+                                          full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+          second_supplier =Supplier.new(corporate_name: 'Spark Industires LTDA', brand_name: 'Spark', registration_number: '52654414000138',
+                                            full_address: 'Torre da Indústria, 1', city: 'Teresina', state: 'PI', email: 'contato@acme.com' )
+
+          # Act
+          # Assert
+          expect(second_supplier).not_to be_valid
+        end
+
+        it 'Falso quando o brand_name já está sendo usado' do
+          # Assert
+          first_supplier= Supplier.create(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+                                          full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+          second_supplier =Supplier.new(corporate_name: 'Spark Industires LTDA', brand_name: 'ACME', registration_number: '52654414000138',
+                                            full_address: 'Torre da Indústria, 1', city: 'Teresina', state: 'PI', email: 'contato_spark@spark.com' )
+
+          # Act
+          # Assert
+          expect(second_supplier).not_to be_valid
+        end
+
+        it 'Falso quando o registration_number já está sendo usado' do
+          # Assert
+          first_supplier= Supplier.create(corporate_name: 'ACME LTDA', brand_name: 'ACME', registration_number: '29452204000145',
+                                          full_address: 'Av das Plamas, 100', city: 'Bauru', state: 'SP', email: 'contato@acme.com' )
+
+          second_supplier =Supplier.new(corporate_name: 'Spark Industires LTDA', brand_name: 'Spark', registration_number: '29452204000145',
+                                            full_address: 'Torre da Indústria, 1', city: 'Teresina', state: 'PI', email: 'contato_spark@spark.com' )
+
+          # Act
+          # Assert
+          expect(second_supplier).not_to be_valid
+        end
+
+      end
+
+    end
+  end
+end
+
+```
+
+
+## Solucionando os Testes
+
+Geramos o modelo para os fornecedores:
+
+```
+rails generate model Supplier corporate_name:string brand_name:string registration_number:integer full_address:string  city:string  state:string  email:string 
+rails db:migrate
+```
+
+Criamos as rotas:
+
+``` resources :suppliers, only:  [:show, :new, :create, :edit, :update, :index] ```
+
+Criando o Controller:
+
+```
+class SuppliersController < ApplicationController
+  before_action :set_supplier, only: [:show, :edit, :update]
+
+  def index
+    @suppliers= Supplier.all
+  end
+
+  def show; end
+
+  def new
+    @supplier = Supplier.new()
+  end
+
+
+  def create
+    # 1 - Recebe os dados enviados
+    #supplier_params
+
+    # 2 - Cria um novo galpão no banco de dados
+    @supplier = Supplier.new(supplier_params)
+
+    #    3 - Redireciona para a tela inicial
+        if @supplier.save()
+          redirect_to suppliers_path, notice: 'Fornecedor cadastrado com sucesso.'
+        else
+          flash.now[:notice] = 'Fornecedor não cadastrado.'
+          render 'new'
+        end
+      end
+
+      def edit; end
+
+      def update
+        #supplier_params
+
+        if @supplier.update(supplier_params)
+          redirect_to supplier_path(  @supplier.id ), notice: 'Fornecedor editado com sucesso.'
+        else
+          flash[:notice] = 'Não foi possível editar o Fornecedor.'
+          render 'edit'
+        end
+      end
+
+      private
+
+      def set_supplier
+        @supplier =  Supplier.find(params[:id])
+      end
+
+      def supplier_params
+        params.require(:supplier).permit( :corporate_name, :brand_name, :registration_number, :full_address,
+                       :city, :state, :email)
+      end
+
+end
+
+```
+
+Criando as views do suppliers_controller.rb.
+
+Em views/layouts/application.html.erb, adicionamos no header:
+
+```
+<nav>
+  <%= link_to 'Fornecedores', suppliers_path%>
+</nav>
+
+```
+
+Criando a view /suppliers/index.html.erb: 
+
+```
+<section id="fornecedores">
+  <h2>Fornecedores</h2>
+  <div>
+  <%= link_to('Cadastrar novo fornecedor', new_supplier_path ) %>
+  </div>
+
+  <%if @suppliers.any?%>
+    <table>
+      <thead>
+        <tr>
+          <th> Nome </th>
+          <th> Localização </th>
+        </tr>
+      </thead>
+      <tbody>
+        <%@suppliers.each do |s|%>
+        <tr>
+          <td><%= link_to s.brand_name, s%></td>
+          <td><%= s.city%> - <%= s.state%></td>
+        </tr>
+        <%end%> 
+
+      </tbody>
+    </table>
+  <%end%>
+
+  <% if @suppliers.empty? %>
+    <p> Não existem fornecedores cadastrados. </p>
+  <%end %>
+</section>
+```
+
+Criando a view suppliers/show.html.erb: 
+
+```
+<h1>Fornecedor <%= @supplier.brand_name%></h1>
+<h2> <%= @supplier.corporate_name %> </h2>
+<dl>
+  <dt>Documento: </dt>
+  <dd><%= @supplier.registration_number%></dd>
+  <dt>Endereço: </dt>
+  <dd><%= @supplier.full_address%> - <%= @supplier.city%> - <%= @supplier.state%></dd>
+  <dt>Email: </dt>
+  <dd><%= @supplier.email%></dd>
+</dl>
+
+<div>
+  <%= link_to 'Editar', edit_supplier_path( @supplier.id ) %>
+</div>
+
+<div>
+  <%= link_to 'Voltar', suppliers_path%>
+</div>
+
+```
+
+Criando a view suppliers/new.html.erb: 
+
+```
+<h1>Novo Fornecedor</h1>
+
+<% if @supplier.errors.any? %>
+<p> Verifique os erros abaixo: </p>
+<ul>
+  <%@supplier.errors.full_messages.each do |msg|%>
+    <li> <%= msg %></li>
+  <%end%>
+</ul>
+<%end%>
+
+
+<%= render 'form'%>
+
+```
+
+Criando o Formulario da view, suppliers/_form.html.erb : 
+
+```
+<%= form_with(model: @supplier ) do |f| %>
+  <div>
+    <%= f.label :corporate_name %>
+    <%= f.text_field :corporate_name%>
+  </div>
+  <div>
+    <%= f.label :brand_name %>
+    <%= f.text_area :brand_name%>
+  </div>
+  <div>
+    <%= f.label :registration_number %>
+    <%= f.number_field :registration_number%>
+  </div>
+  <div>
+    <%= f.label :full_address%>
+    <%= f.text_field :full_address%>
+  </div>
+  <div>
+    <%= f.label :city%>
+    <%= f.text_field :city%>
+  </div>
+  <div>
+    <%= f.label :state %>
+    <%= f.text_field :state%>
+  </div>
+  <div>
+    <%= f.label :email  %>
+    <%= f.email_field :email%>
+  </div>
+  <div>
+    <%= f.submit 'Enviar' %>   
+  </div>
+<%end%>
+
+```
+
+
+Criando a view suppliers/edit.html.erb: 
+
+```
+<h1>Editar Fornecedor</h1>
+
+<% if @supplier .errors.any? %>
+<p> Verifique os erros abaixo: </p>
+<ul>
+  <%@supplier .errors.full_messages.each do |msg|%>
+    <li> <%= msg %></li>
+  <%end%>
+</ul>
+<%end%>
+
+<%= render 'form'%>
+```
+
+Fazendo a localização em config/locales/models.yml, adicionamos:
+
+```
+supplier:
+  corporate_name: 'Razão Social'
+  brand_name: 'Nome Fantasia'
+  registration_number: 'CNPJ'
+  full_address: 'Endereço'
+  city: 'Cidade'
+  state: 'Estado'
+  email: 'E-mail'
+         
+```
+
+
+## Commit da aula 22
+
+```
+git add .
+git commit -m "CRUD de Fornecedores - Aula 22"
+git push
+```

@@ -39,7 +39,7 @@ describe 'Usuario vê fornecedores' do
       click_on 'Fornecedores'
     end
     #  Assert
-    expect(page).to have_content 'Não existem fornecedores cadastrados,'
+    expect(page).to have_content 'Não existem fornecedores cadastrados.'
   end
 
 end
