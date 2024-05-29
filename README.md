@@ -1867,3 +1867,40 @@ git add .
 git commit -m "CRUD de Fornecedores - Aula 22"
 git push
 ```
+
+fazer atalhos de comados no git
+
+
+**Commit**
+
+```
+git add .
+git commit -m "Commit_texto"
+git push
+```
+
+
+
+**Criando o Model:**
+
+```rails generate model nome_model name:string area:integer event:references```
+
+**Migração:**
+
+https://guides.rubyonrails.org/active_record_migrations.html
+
+
+```rails generate migration AddExtrasToOrders extra_fee_discount_description:string payment_method_used:string```
+
+ ```rails db:migrate```
+
+**Criação de User usando Devise:**
+
+```rails generate devise userclient```
+
+
+
+
+
+
+
